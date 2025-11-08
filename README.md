@@ -1,4 +1,8 @@
-# 🦆 DuckAI
+<p align="center">
+  <img src="https://assets.mattikjellstadli.com/products/20/images/logo.png" alt="Sonique Logo" width="180"/>
+</p>
+
+<h1 align="center">DuckAI</h1>
 
 **DuckAI** is a lightweight, local “AI” chatbot with a sense of humor — powered by Spring Boot and fueled by duck logic.
 It learns from a collection of prompt–answer “scenarios” and reloads them automatically, giving you a chatty duck that never gets stale.
