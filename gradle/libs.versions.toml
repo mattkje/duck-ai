@@ -1,0 +1,39 @@
+[versions]
+spring-boot = "3.5.7"
+spring-security = "6.5.6"
+spring-dep = "1.1.7"
+postgresql = "42.7.8"
+batik = "1.19"
+lombok = "1.18.42"
+jboss-logging = "3.6.1.Final"
+jjwt = "0.13.0"
+jakarta-annotation = "3.0.0"
+mockito = "5.20.0"
+liquibase = "5.0.1"
+
+[libraries]
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring-boot" }
+spring-boot-starter-data-rest = { module = "org.springframework.boot:spring-boot-starter-data-rest", version.ref = "spring-boot" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security", version.ref = "spring-boot" }
+spring-security-config = { module = "org.springframework.security:spring-security-config", version.ref = "spring-security" }
+spring-security-web = { module = "org.springframework.security:spring-security-web", version.ref = "spring-security" }
+
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
+batik-transcoder = { module = "org.apache.xmlgraphics:batik-transcoder", version.ref = "batik" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+jboss-logging = { module = "org.jboss.logging:jboss-logging", version.ref = "jboss-logging" }
+
+jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
+jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
+jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
+
+jakarta-annotation = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
+
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dep" }
