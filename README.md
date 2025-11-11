@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://assets.mattikjellstadli.com/products/20/images/logo.png" alt="Sonique Logo" width="180"/>
+  <img src="https://assets.mattikjellstadli.com/products/20/images/logo-400w.png" alt="Sonique Logo" width="180"/>
 </p>
 
 <h1 align="center">DuckAI</h1>
