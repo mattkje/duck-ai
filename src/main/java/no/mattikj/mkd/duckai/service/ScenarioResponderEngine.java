@@ -30,6 +30,7 @@ public class ScenarioResponderEngine {
     private static final double SIMILARITY_THRESHOLD = 0.45;
     private final List<ScenarioItem> memory = new CopyOnWriteArrayList<>();
     private final ScenarioService scenarioService;
+    private final WebSearchEngine webSearchEngine;
 
     private static final Set<String> STOPWORDS = Set.of(
         "the", "is", "a", "an", "and", "or", "what", "how", "are"
@@ -70,6 +71,11 @@ public class ScenarioResponderEngine {
 
         if (best != null) {
             return best.response();
+        }
+
+        String summary = webSearchEngine.searchInternetForResponse(prompt);
+        if (summary != null && !summary.isBlank()) {
+            return summary;
         }
 
         return "I have no idea how to respond to that yet.";
