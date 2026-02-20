@@ -102,7 +102,7 @@ public class ScenarioResponderEngine {
         return new PromptResponse("I have no idea how to respond to that yet.", ResponseSourceType.LOCAL);
     }
 
-    private WebSearchType classifyPrompt(final String prompt) {
+    public WebSearchType classifyPrompt(final String prompt) {
         if (prompt == null || prompt.isBlank()) return null;
 
         final String lower = prompt.toLowerCase();

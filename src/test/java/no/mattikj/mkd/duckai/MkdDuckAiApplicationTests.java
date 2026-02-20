@@ -1,4 +1,4 @@
-package no.mattikj.mkdduckai;
+package no.mattikj.mkd.duckai;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
