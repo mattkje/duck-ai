@@ -51,14 +51,4 @@ public class ScenarioService {
         int rows = scenarioDAO.createScenario(dto);
         return rows > 0;
     }
-
-    public int learnScenarios(List<PromptLearnRequest> promptLearnRequests) {
-        int successCount = 0;
-        for (PromptLearnRequest request : promptLearnRequests) {
-            if (addScenario(request)) {
-                successCount++;
-            }
-        }
-        return successCount;
-    }
 }

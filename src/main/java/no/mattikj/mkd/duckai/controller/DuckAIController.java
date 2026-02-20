@@ -1,24 +1,25 @@
 package no.mattikj.mkd.duckai.controller;
 
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import no.mattikj.mkd.duckai.dto.PromptLearnRequest;
 import no.mattikj.mkd.duckai.dto.PromptRequest;
 import no.mattikj.mkd.duckai.dto.PromptResponse;
 import no.mattikj.mkd.duckai.service.ScenarioResponderEngine;
 import no.mattikj.mkd.duckai.service.ScenarioService;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * DuckAI Controller class.
  *
  * @author Matti Kjellstadli
- * @version 1.1.0
+ * @version 1.2.0
  */
 @RestController
 @RequestMapping("/api/duckai")
@@ -36,7 +37,7 @@ public class DuckAIController {
 
     @PostMapping("/learn")
     public PromptResponse handleDuckAILearning(@RequestBody final List<PromptLearnRequest> promptLearnRequests) {
-        final int success = scenarioService.learnScenarios(promptLearnRequests);
-        return new PromptResponse("Successfully learned " + success + " scenarios.");
+        final int successCount = scenarioResponderEngine.learnScenarios(promptLearnRequests);
+        return new PromptResponse("Successfully learned " + successCount + " scenarios.");
     }
 }

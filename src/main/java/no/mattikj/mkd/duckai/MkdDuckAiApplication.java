@@ -7,13 +7,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * MKD DuckAI Application main class.
  *
  * @author Matti Kjellstadli
- * @version 1.1.0
+ * @version 1.2.0
  */
 @SpringBootApplication
 public class MkdDuckAiApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(MkdDuckAiApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(MkdDuckAiApplication.class, args);
+    }
 
 }
