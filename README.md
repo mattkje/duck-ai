@@ -4,8 +4,8 @@
 
 <h1 align="center">DuckAI</h1>
 
-**DuckAI** is a lightweight, local “AI” chatbot with a sense of humor — powered by Spring Boot and fueled by duck logic.
-It learns from a collection of prompt–answer “scenarios” and reloads them automatically, giving you a chatty duck that never gets stale.
+**DuckAI** is a lightweight, local “AI” chatbot — powered by Spring Boot.
+It learns from a collection of prompt–answer “scenarios” and reloads them automatically, so should probably get this out of the way quickly:
 
 **Disclaimer:** DuckAI is not a true AI model. It uses simple token similarity matching to find the best response from predefined scenarios.
 
@@ -14,9 +14,7 @@ It learns from a collection of prompt–answer “scenarios” and reloads them 
 ## 🧩 Features
 
 * 🗂 **Scenario-based responses** — DuckAI matches your message against known “scenarios” and responds with the best-fitting answer.
-* 🔄 **Automatic reloading** — Scenarios are reloaded every 5 minutes (`@Scheduled(fixedRate = 300000)`) so updates appear without restarting.
-* 💬 **Fallback personality** — If no good match is found, DuckAI replies with a random witty response.
-* ⚙️ **File-based configuration** — Scenarios can be stored as JSON files for easy editing and expansion.
+* 🔄 **Automatic saving** — Scenarios are saved to the database, while also keeping them in memory so updates appear without restarting.
 * 🧠 **Scenario Learner (optional)** — Can learn or adapt from new user prompts using a file manager or custom logic.
 
 ---
@@ -41,7 +39,7 @@ It learns from a collection of prompt–answer “scenarios” and reloads them 
 ## ⚙️ How It Works
 
 1. When DuckAI starts, it loads all scenarios using `ScenarioService`.
-2. Every 5 minutes, it automatically reloads them via `@Scheduled(fixedRate = 300000)`.
+2. Every 5 minutes, it automatically reloads them via `@Scheduled(fixedRate = 300000)` to release some memory.
 3. When a prompt arrives, `ScenarioResponderEngine` compares it against known questions using a **token-based similarity metric**.
 4. If a match is found above the similarity threshold (default `0.3`), the duck replies with the associated answer.
 5. Otherwise, it gives a random sarcastic or funny fallback message.
@@ -65,7 +63,7 @@ It learns from a collection of prompt–answer “scenarios” and reloads them 
 
 ### Prerequisites
 
-* Java 17+
+* Java 21+
 * Maven or Gradle
 
 ### Run via Maven
