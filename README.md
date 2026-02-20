@@ -1,25 +1,32 @@
 <p align="center">
-  <img src="https://assets.mattikjellstadli.com/products/20/images/logo-400w.png" alt="Sonique Logo" width="180"/>
+  <img src="https://assets.mattikjellstadli.com/products/20/images/logo-400w.png" alt="DuckAI Logo" width="180"/>
 </p>
 
 <h1 align="center">DuckAI</h1>
 
-**DuckAI** is a lightweight, local “AI” chatbot — powered by Spring Boot.
-It learns from a collection of prompt–answer “scenarios” and reloads them automatically, so should probably get this out of the way quickly:
+**DuckAI** is a lightweight, local chatbot framework powered by Spring Boot.
+It learns from a collection of prompt–answer scenarios and can dynamically reload them without restarting.
 
-**Disclaimer:** DuckAI is not a true AI model. It uses simple token similarity matching to find the best response from predefined scenarios.
-
----
-
-## 🧩 Features
-
-* 🗂 **Scenario-based responses** — DuckAI matches your message against known “scenarios” and responds with the best-fitting answer.
-* 🔄 **Automatic saving** — Scenarios are saved to the database, while also keeping them in memory so updates appear without restarting.
-* 🧠 **Scenario Learner (optional)** — Can learn or adapt from new user prompts using a file manager or custom logic.
+**Disclaimer:**
+DuckAI is not a general-purpose AI model. It relies on token similarity and classification logic to determine responses.
+External knowledge is fetched from public APIs only when no custom scenario matches.
 
 ---
 
-## 🧠 Example Post Request Body for adding Scenarios
+## Features
+
+* **Scenario-based responses** — Matches prompts against stored scenarios using cosine similarity.
+* **Custom prompt prioritization** — Learned scenarios are always checked before external APIs.
+* **Wikipedia fallback** — Retrieves article summaries and images when no custom match is found.
+* **Book search (Open Library)** — Fetches book details and cover images without requiring API keys.
+* **Joke API integration** — Returns random jokes on demand.
+* **Automatic scenario reloading** — Scenarios refresh periodically without restarting the service.
+* **Rate-limited API requests** — Prevents excessive queries to external services.
+* **Markdown-ready responses** — All external responses include Markdown formatting for links and images.
+
+---
+
+## Example Scenario Request
 
 ```json
 [
@@ -36,17 +43,35 @@ It learns from a collection of prompt–answer “scenarios” and reloads them 
 
 ---
 
-## ⚙️ How It Works
+## Architecture & Workflow
 
-1. When DuckAI starts, it loads all scenarios using `ScenarioService`.
-2. Every 5 minutes, it automatically reloads them via `@Scheduled(fixedRate = 300000)` to release some memory.
-3. When a prompt arrives, `ScenarioResponderEngine` compares it against known questions using a **token-based similarity metric**.
-4. If a match is found above the similarity threshold (default `0.3`), the duck replies with the associated answer.
-5. Otherwise, it gives a random sarcastic or funny fallback message.
+1. **Startup:** DuckAI loads all predefined scenarios into memory.
+2. **Scheduled Reload:** Every 5 minutes, scenarios are refreshed automatically via `@Scheduled`.
+3. **Prompt Handling:**
+
+   * Explicit intents (e.g., joke, book) are processed immediately.
+   * Otherwise, custom scenarios are evaluated using cosine similarity.
+   * Wikipedia is used as a fallback if no scenario matches sufficiently.
+4. **Response Formatting:** All external responses include Markdown-formatted links and images.
+5. **Fallback:** If no suitable response is found, DuckAI returns a generic fallback message.
 
 ---
 
-## 🧪 Example Interaction
+## External Data Sources
+
+DuckAI integrates with the following free, public APIs (no API keys required):
+
+| Source                 | Description                                                   |
+| ---------------------- | ------------------------------------------------------------- |
+| **Wikipedia REST API** | Retrieves article summaries and images.                       |
+| **Open Library API**   | Fetches book metadata, authors, publication year, and covers. |
+| **JokeAPI**            | Returns random jokes.                                         |
+
+All external requests include a proper `User-Agent` and are rate-limited.
+
+---
+
+## Example Interaction
 
 **User:** “What is Java?”
 **DuckAI:** “Java? My favorite beverage *and* language.”
@@ -59,7 +84,7 @@ It learns from a collection of prompt–answer “scenarios” and reloads them 
 
 ---
 
-## 🚀 Running the Project
+## Running the Project
 
 ### Prerequisites
 
@@ -79,13 +104,13 @@ mvn clean package
 java -jar target/duckai-*.jar
 ```
 
-Once running, DuckAI can be accessed through your chosen interface (HTTP API, console, or custom frontend).
+Once running, DuckAI can be accessed via HTTP API, console, or a custom frontend.
 
 ---
 
-## 🕒 Scheduled Reload
+## Scheduled Reload
 
-By default, DuckAI reloads all scenarios every **5 minutes** (300,000 ms):
+By default, DuckAI reloads all scenarios every **5 minutes (300,000 ms)**:
 
 ```java
 @Scheduled(fixedRate = 300000)
@@ -94,22 +119,22 @@ public void scheduledReload() {
 }
 ```
 
-You can change this interval in the code or by external configuration.
+The interval can be customized via external configuration.
 
 ---
 
-## 🧩 Extending DuckAI
+## Extending DuckAI
 
-You can easily enhance DuckAI with:
+DuckAI is designed for extensibility:
 
-* **Scenario Learner:** dynamically add new scenarios based on user input.
-* **Database integration:** persist scenarios using JPA or a repository.
-* **WebSocket API:** create a live chat frontend.
-* **Similarity improvements:** replace token similarity with cosine similarity, TF-IDF, or embeddings.
+* **Scenario Learner:** Dynamically add new scenarios based on user input.
+* **Database integration:** Persist scenarios using JPA or a repository.
+* **WebSocket API:** Enable real-time chat frontends.
+* **Similarity enhancements:** Upgrade token similarity with TF-IDF, cosine similarity, or embeddings for smarter responses.
 
 ---
 
-## 🧾 License
+## License
 
 This project is open-source under the **MIT License**.
-Feel free to use, modify, and share DuckAI — but remember to always give your ducks credit. 
+Feel free to use, modify, and share DuckAI — but please give credit where due.

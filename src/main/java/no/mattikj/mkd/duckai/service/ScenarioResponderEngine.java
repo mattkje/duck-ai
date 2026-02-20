@@ -63,6 +63,16 @@ public class ScenarioResponderEngine {
         ));
     }
 
+    /**
+     * Generates a response for the given prompt.
+     * <p>
+     * Resolution priority:
+     * 1. Explicit API types (e.g. JOKE, BOOK) are handled immediately.
+     * 2. If no explicit type is detected (OTHER), custom learned scenarios
+     * are evaluated first using cosine similarity.
+     * 3. Wikipedia is deliberately used as a final fallback only,
+     * ensuring custom prompts are always prioritized over generic knowledge.
+     */
     public PromptResponse generateResponse(final String prompt) {
         if (prompt == null || prompt.isBlank()) {
             return new PromptResponse("You must speak for me to quack.", ResponseSourceType.LOCAL);
@@ -103,6 +113,7 @@ public class ScenarioResponderEngine {
         if (lower.contains("book") || lower.contains("author") || lower.contains("novel")) {
             return WebSearchType.BOOK;
         }
+
         return WebSearchType.OTHER;
     }
 

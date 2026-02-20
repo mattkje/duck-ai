@@ -95,10 +95,13 @@ public class WebSearchEngine {
      * Sanitizes a prompt for Wikipedia-friendly topics (joins words with underscores).
      */
     private String sanitizePromptForWiki(String prompt) {
-        String sanitized = prompt.toLowerCase().replaceAll("[^a-zA-Z0-9\\s]", "");
+        String sanitized = prompt
+            .toLowerCase()
+            .replaceAll("[^a-zA-Z0-9()\\s]", "");
         return Arrays.stream(sanitized.split("\\s+"))
             .filter(w -> !STOPWORDS.contains(w))
-            .map(w -> w.isEmpty() ? "" : Character.toUpperCase(w.charAt(0)) + w.substring(1))
+            .map(w -> w.isEmpty() ? "" :
+                Character.toUpperCase(w.charAt(0)) + w.substring(1))
             .collect(Collectors.joining("_"));
     }
 
