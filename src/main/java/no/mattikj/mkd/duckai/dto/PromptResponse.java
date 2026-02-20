@@ -2,21 +2,25 @@ package no.mattikj.mkd.duckai.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import no.mattikj.mkd.duckai.domain.ResponseSourceType;
 
 /**
  * DTO representing a response from the DuckAI service.
  *
  * @author Matti Kjellstadli
- * @version 1.1.0
+ * @version 1.2.0
  */
 @Setter
 @Getter
 public class PromptResponse {
     private String reply;
+    private ResponseSourceType source;
 
-    public PromptResponse() {}
+    public PromptResponse() {
+    }
 
-    public PromptResponse(String reply) {
+    public PromptResponse(String reply, ResponseSourceType source) {
         this.reply = reply;
+        this.source = source;
     }
 }

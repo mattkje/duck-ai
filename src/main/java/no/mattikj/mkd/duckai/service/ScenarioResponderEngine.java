@@ -12,9 +12,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import no.mattikj.mkd.duckai.domain.ResponseSourceType;
 import no.mattikj.mkd.duckai.domain.Scenario;
 import no.mattikj.mkd.duckai.domain.ScenarioItem;
+import no.mattikj.mkd.duckai.domain.WebSearchType;
 import no.mattikj.mkd.duckai.dto.PromptLearnRequest;
+import no.mattikj.mkd.duckai.dto.PromptResponse;
 
 /**
  * ScenarioResponder class that simulates a simple AI with humorous responses.
@@ -60,25 +63,47 @@ public class ScenarioResponderEngine {
         ));
     }
 
-    public String generateResponse(String prompt) {
+    public PromptResponse generateResponse(final String prompt) {
         if (prompt == null || prompt.isBlank()) {
-            return "You must speak for me to quack.";
+            return new PromptResponse("You must speak for me to quack.", ResponseSourceType.LOCAL);
         }
 
-        Map<String, Integer> inputVector = vectorize(prompt);
+        WebSearchType type = classifyPrompt(prompt);
 
-        ScenarioItem best = findBestMatch(inputVector);
+        if (type == WebSearchType.OTHER) {
+            final Map<String, Integer> inputVector = vectorize(prompt);
 
-        if (best != null) {
-            return best.response();
+            final ScenarioItem best = findBestMatch(inputVector);
+
+            if (best != null) {
+                return new PromptResponse(best.response(), ResponseSourceType.LOCAL);
+            }
+
+            // if best is null, Type has to be WIKI
+            type = WebSearchType.WIKI;
         }
 
-        String summary = webSearchEngine.searchInternetForResponse(prompt);
+
+        final String summary = webSearchEngine.searchInternetForResponse(prompt, type);
         if (summary != null && !summary.isBlank()) {
-            return summary;
+            return new PromptResponse(summary, ResponseSourceType.INTERNET);
         }
 
-        return "I have no idea how to respond to that yet.";
+        return new PromptResponse("I have no idea how to respond to that yet.", ResponseSourceType.LOCAL);
+    }
+
+    private WebSearchType classifyPrompt(final String prompt) {
+        if (prompt == null || prompt.isBlank()) return null;
+
+        final String lower = prompt.toLowerCase();
+
+        if (lower.contains("joke") || lower.contains("funny") || lower.startsWith("tell me a")) {
+            return WebSearchType.JOKE;
+        }
+        if (lower.contains("book") || lower.contains("author") || lower.contains("novel")) {
+            return WebSearchType.BOOK;
+        }
+        return WebSearchType.OTHER;
     }
 
     public int learnScenarios(List<PromptLearnRequest> promptLearnRequests) {
