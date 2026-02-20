@@ -14,11 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
- * WebSearchEngine class that fetches summaries from Wikipedia.
- * Improved version with better stopword handling and error logging.
+ * WebSearchEngine class that fetches summaries from Wikipedia
+ * with rate limiting and proper attribution.
  *
  * @author Matti
  * @version 1.2.0
@@ -32,23 +33,22 @@ public class WebSearchEngine {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private static final long MIN_INTERVAL_MS = 1000;
+    private final AtomicLong lastRequestTime = new AtomicLong(0);
+
     public String searchInternetForResponse(String prompt) {
         if (prompt == null || prompt.isBlank()) {
-            return "Prompt is empty, please provide a query.";
+            return null;
         }
 
         String sanitizedPrompt = sanitizePromptForWiki(prompt);
         if (sanitizedPrompt.isBlank()) {
-            return "Could not extract a valid topic from your query.";
+            return null;
         }
 
-        String result = fetchWikipediaSummary(sanitizedPrompt);
-        return result != null ? result : null;
+        return fetchWikipediaSummaryWithRateLimit(sanitizedPrompt);
     }
 
-    /**
-     * Sanitizes a prompt to a Wikipedia-friendly topic.
-     */
     private String sanitizePromptForWiki(String prompt) {
         String sanitized = prompt.toLowerCase()
             .replaceAll("[^a-zA-Z0-9\\s]", "");
@@ -60,7 +60,25 @@ public class WebSearchEngine {
     }
 
     /**
-     * Fetches a summary from Wikipedia + appends the source link.
+     * Fetches Wikipedia summary with rate limiting.
+     */
+    private String fetchWikipediaSummaryWithRateLimit(String query) {
+        long now = System.currentTimeMillis();
+        long last = lastRequestTime.get();
+        long wait = MIN_INTERVAL_MS - (now - last);
+        if (wait > 0) {
+            try {
+                Thread.sleep(wait);
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+        lastRequestTime.set(System.currentTimeMillis());
+        return fetchWikipediaSummary(query);
+    }
+
+    /**
+     * Fetches a summary from Wikipedia + appends the source link and attribution.
      */
     private String fetchWikipediaSummary(String query) {
         String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
@@ -69,7 +87,7 @@ public class WebSearchEngine {
         try {
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("User-Agent", "DuckAI/2.0 (contact@example.com)");
+            conn.setRequestProperty("User-Agent", "DuckAI/2.1 (contact@example.com)");
             conn.setConnectTimeout(5000);
             conn.setReadTimeout(5000);
 
@@ -83,6 +101,7 @@ public class WebSearchEngine {
                     if (pageUrl != null && !pageUrl.asText().isBlank()) {
                         result += "\n\nSource: " + pageUrl.asText();
                     }
+                    result += "\n\n(Information from Wikipedia, CC BY-SA 3.0)";
                     return result;
                 }
             }
