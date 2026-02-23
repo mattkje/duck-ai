@@ -29,7 +29,7 @@ public class ScenarioService {
         return dtos.stream().map(dto -> new Scenario(dto.getPrompt(), dto.getAnswer())).collect(Collectors.toList());
     }
 
-    public boolean addScenario(PromptLearnRequest promptLearnRequest) {
+    public boolean addScenario(final PromptLearnRequest promptLearnRequest) {
         String prompt = promptLearnRequest.getPrompt();
         String answer = promptLearnRequest.getAnswer();
         if (prompt == null || answer == null) {
@@ -44,7 +44,7 @@ public class ScenarioService {
             return false;
         }
 
-        ScenarioDto dto = new ScenarioDto();
+        final ScenarioDto dto = new ScenarioDto();
         dto.setPrompt(prompt);
         dto.setAnswer(answer);
 

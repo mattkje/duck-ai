@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Actuator Controller class. Provides basic health check endpoint.
  *
  * @author Matti Kjellstadli
- * @version 1.1.0
+ * @version 1.2.0
  */
 @RestController
 @RequestMapping("/api/actuator")
@@ -27,7 +27,7 @@ public class ActuatorController {
     @GetMapping("/version")
     public ResponseEntity<Map<String, String>> version() {
         final Map<String, String> versionInfo = new HashMap<>();
-        String version = getClass().getPackage().getImplementationVersion();
+        final String version = getClass().getPackage().getImplementationVersion();
         versionInfo.put("version",
                         version != null
                         ? version

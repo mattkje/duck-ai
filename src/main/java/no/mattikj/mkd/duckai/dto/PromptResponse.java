@@ -19,7 +19,7 @@ public class PromptResponse {
     public PromptResponse() {
     }
 
-    public PromptResponse(String reply, ResponseSourceType source) {
+    public PromptResponse(final String reply, final ResponseSourceType source) {
         this.reply = reply;
         this.source = source;
     }

@@ -3,6 +3,12 @@ package no.mattikj.mkd.duckai.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * DTO representing a scenario.
+ *
+ * @author Matti Kjellstadli
+ * @version 1.2.0
+ */
 @Setter
 @Getter
 public class ScenarioDto {

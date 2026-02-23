@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import no.mattikj.mkd.duckai.domain.ResponseSourceType;
@@ -15,7 +14,6 @@ import no.mattikj.mkd.duckai.dto.PromptLearnRequest;
 import no.mattikj.mkd.duckai.dto.PromptRequest;
 import no.mattikj.mkd.duckai.dto.PromptResponse;
 import no.mattikj.mkd.duckai.service.ScenarioResponderEngine;
-import no.mattikj.mkd.duckai.service.ScenarioService;
 
 /**
  * DuckAI Controller class.

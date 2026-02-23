@@ -18,7 +18,7 @@ public class PromptLearnRequest {
     public PromptLearnRequest() {
     }
 
-    public PromptLearnRequest(String prompt, String answer) {
+    public PromptLearnRequest(final String prompt, final String answer) {
         this.prompt = prompt;
         this.answer = answer;
     }

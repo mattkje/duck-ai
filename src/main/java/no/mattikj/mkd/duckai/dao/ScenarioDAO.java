@@ -20,12 +20,12 @@ public class ScenarioDAO {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public ScenarioDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public ScenarioDAO(final NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     public List<ScenarioDto> getAllScenarios() {
-        String sql = """
+        final String sql = """
             select s.*
             from duck.scenario s
             """;
@@ -33,22 +33,22 @@ public class ScenarioDAO {
     }
 
     public ScenarioDto getScenario(final Long scenarioId) {
-        String sql = """
+        final String sql = """
             select s.*
             from duck.scenario s
             where s.scenario_db_id = :scenarioId
             """;
-        var params = new HashMap<String, Object>();
+        final HashMap<String, Long> params = new HashMap<>();
         params.put("scenarioId", scenarioId);
         return namedParameterJdbcTemplate.queryForObject(sql, params, new ScenarioRowMapper());
     }
 
     public int createScenario(final ScenarioDto scenario) {
-        String sql = """
+        final String sql = """
             insert into duck.scenario (prompt, answer)
             values (:prompt, :answer)
             """;
-        var params = new HashMap<String, Object>();
+        final HashMap<String, String> params = new HashMap<>();
         params.put("prompt", scenario.getPrompt());
         params.put("answer", scenario.getAnswer());
         return namedParameterJdbcTemplate.update(sql, params);

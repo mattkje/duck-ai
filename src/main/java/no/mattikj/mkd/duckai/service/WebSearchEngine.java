@@ -8,8 +8,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -25,7 +28,7 @@ import no.mattikj.mkd.duckai.domain.WebSearchType;
  * WebSearchEngine class that fetches summaries from Wikipedia
  * with rate limiting and proper attribution.
  *
- * @author Matti
+ * @author Matti Kjellstadli
  * @version 1.2.0
  */
 @Component
@@ -66,7 +69,7 @@ public class WebSearchEngine {
     /**
      * Returns a Markdown-ready response based on the search type.
      */
-    public String searchInternetForResponse(String prompt, WebSearchType type) {
+    public String searchInternetForResponse(final String prompt, final WebSearchType type) {
         if (type == null) return null;
 
         switch (type) {
@@ -81,7 +84,7 @@ public class WebSearchEngine {
             }
             case BOOK -> {
                 if (prompt == null || prompt.isBlank()) return null;
-                String sanitizedPrompt = sanitizePromptForWiki(prompt);
+                final String sanitizedPrompt = sanitizePromptForWiki(prompt);
                 if (sanitizedPrompt.isBlank()) return null;
                 return fetchBookFromAPI(sanitizedPrompt);
             }
@@ -94,8 +97,8 @@ public class WebSearchEngine {
     /**
      * Sanitizes a prompt for Wikipedia-friendly topics (joins words with underscores).
      */
-    private String sanitizePromptForWiki(String prompt) {
-        String sanitized = prompt
+    private String sanitizePromptForWiki(final String prompt) {
+        final String sanitized = prompt
             .toLowerCase()
             .replaceAll("[^a-zA-Z0-9()\\s]", "");
         return Arrays.stream(sanitized.split("\\s+"))
@@ -108,14 +111,15 @@ public class WebSearchEngine {
     /**
      * Fetches Wikipedia summary with rate limiting.
      */
-    private String fetchWikipediaSummaryWithRateLimit(String query) {
-        long now = System.currentTimeMillis();
-        long last = lastRequestTime.get();
-        long wait = minIntervalMs - (now - last);
+    private String fetchWikipediaSummaryWithRateLimit(final String query) {
+        final long now = System.currentTimeMillis();
+        final long last = lastRequestTime.get();
+        final long wait = minIntervalMs - (now - last);
         if (wait > 0) {
             try {
                 Thread.sleep(wait);
-            } catch (InterruptedException ignored) {
+            } catch (final InterruptedException ignored) {
+                // We can just ignore this
             }
         }
 
@@ -123,36 +127,63 @@ public class WebSearchEngine {
         return fetchWikipediaSummary(query);
     }
 
-    private JsonNode getJsonFromUrl(String urlString) throws IOException {
-        URL url = new URL(urlString);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestProperty("User-Agent", userAgent);
-        conn.setConnectTimeout(connectTimeout);
-        conn.setReadTimeout(readTimeout);
+    /**
+     * Performs an HTTP GET request to the given URL and parses the response body as JSON.
+     *
+     * @param urlString the URL to request
+     * @return the response parsed as a {@link JsonNode}
+     * @throws IOException if the request fails or the response cannot be parsed
+     */
+    private JsonNode getJsonFromUrl(final String urlString) throws IOException {
+        try {
+            final URL url = new URI(urlString).toURL();
+            final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-        try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-            return MAPPER.readTree(reader);
+            conn.setRequestProperty("User-Agent", userAgent);
+            conn.setConnectTimeout(connectTimeout);
+            conn.setReadTimeout(readTimeout);
+
+            final int status = conn.getResponseCode();
+
+            final InputStream stream = status >= 200 && status < 300
+                ? conn.getInputStream()
+                : conn.getErrorStream();
+
+            try (BufferedReader reader =
+                     new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+
+                if (status < 200 || status >= 300) {
+                    throw new IOException("HTTP " + status + " while calling " + urlString);
+                }
+
+                return MAPPER.readTree(reader);
+            } finally {
+                conn.disconnect();
+            }
+
+        } catch (final URISyntaxException e) {
+            throw new IOException("Invalid URL: " + urlString, e);
         }
     }
+
 
     /**
      * Fetches a summary from Wikipedia + appends the source link and attribution.
      */
-    private String fetchWikipediaSummary(String query) {
+    private String fetchWikipediaSummary(final String query) {
         try {
-            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
-            String url = wikipediaBaseUrl + encodedQuery;
+            final String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            final String url = wikipediaBaseUrl + encodedQuery;
 
-            JsonNode root = getJsonFromUrl(url);
+            final JsonNode root = getJsonFromUrl(url);
 
-            String extract = root.path("extract").asText("");
+            final String extract = root.path("extract").asText("");
             if (extract.isBlank()) return null;
 
-            String imageUrl = root.path("originalimage").path("source").asText("");
-            String pageUrl = root.path("content_urls").path("desktop").path("page").asText("");
+            final String imageUrl = root.path("originalimage").path("source").asText("");
+            final String pageUrl = root.path("content_urls").path("desktop").path("page").asText("");
 
-            StringBuilder result = new StringBuilder(extract);
+            final StringBuilder result = new StringBuilder(extract);
 
             if (!imageUrl.isBlank()) {
                 result.append("<br>![").append(query).append("](").append(imageUrl).append(")");
@@ -166,14 +197,14 @@ public class WebSearchEngine {
 
             return result.toString();
 
-        } catch (Exception ignored) {
+        } catch (final Exception ignored) {
             return null;
         }
     }
 
     private String fetchJokeFromAPI() {
         try {
-            JsonNode root = getJsonFromUrl(jokeBaseUrl);
+            final JsonNode root = getJsonFromUrl(jokeBaseUrl);
 
             if (root.path("type").asText().equals("single")) {
                 return root.path("joke").asText(null);
@@ -185,35 +216,36 @@ public class WebSearchEngine {
                        root.path("delivery").asText("");
             }
 
-        } catch (Exception ignored) {
+        } catch (final Exception ignored) {
+            // Ignoring on purpose
         }
 
         return null;
     }
 
-    private String fetchBookFromAPI(String query) {
+    private String fetchBookFromAPI(final String query) {
         try {
-            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
-            String url = openLibrarySearchUrl + encodedQuery + "&limit=1";
+            final String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            final String url = openLibrarySearchUrl + encodedQuery + "&limit=1";
 
-            JsonNode root = getJsonFromUrl(url);
-            JsonNode docs = root.path("docs");
+            final JsonNode root = getJsonFromUrl(url);
+            final JsonNode docs = root.path("docs");
 
             if (!docs.isArray() || docs.isEmpty()) return null;
 
-            JsonNode book = docs.get(0);
+            final JsonNode book = docs.get(0);
 
-            String title = book.path("title").asText("");
-            String author = book.path("author_name").isArray()
+            final String title = book.path("title").asText("");
+            final String author = book.path("author_name").isArray()
                 ? book.path("author_name").get(0).asText("")
                 : "";
-            String year = book.path("first_publish_year").asText("");
-            String workKey = book.path("key").asText("");
-            String coverId = book.path("cover_i").asText("");
+            final String year = book.path("first_publish_year").asText("");
+            final String workKey = book.path("key").asText("");
+            final String coverId = book.path("cover_i").asText("");
 
             if (title.isBlank()) return null;
 
-            StringBuilder result = new StringBuilder();
+            final StringBuilder result = new StringBuilder();
 
             result.append("### ").append(title);
 
@@ -226,7 +258,7 @@ public class WebSearchEngine {
             }
 
             if (!coverId.isBlank()) {
-                String coverUrl = openLibraryCoverUrl + coverId + "-L.jpg";
+                final String coverUrl = openLibraryCoverUrl + coverId + "-L.jpg";
                 result.append("<br>![").append(title).append(" Cover](")
                     .append(coverUrl).append(")");
             }
@@ -240,7 +272,7 @@ public class WebSearchEngine {
 
             return result.toString();
 
-        } catch (Exception ignored) {
+        } catch (final Exception ignored) {
             return null;
         }
     }

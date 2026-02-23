@@ -17,7 +17,7 @@ public class PromptRequest {
     public PromptRequest() {
     }
 
-    public PromptRequest(String prompt) {
+    public PromptRequest(final String prompt) {
         this.prompt = prompt;
     }
 }
